@@ -1,0 +1,4 @@
+# Staging — nothing on this site should be indexed yet.
+# Remove this file (or replace with an allow policy) when going live.
+User-agent: *
+Disallow: /
