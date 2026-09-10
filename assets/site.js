@@ -1,54 +1,64 @@
-/* Mobile nav toggle + contact form submit. Small enough to stay dependency-free. */
+/* Mobile drawer nav + contact form submit */
 (function () {
-  var btn = document.querySelector('.menu-btn');
-  var nav = document.getElementById('site-nav');
-  if (btn && nav) {
-    btn.addEventListener('click', function () {
-      var open = nav.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
+  'use strict';
+
+  var btn     = document.querySelector('[data-menu-toggle]');
+  var drawer  = document.getElementById('m-drawer');
+  var overlay = document.getElementById('m-overlay');
+  var closers = document.querySelectorAll('[data-menu-close]');
+
+  function setMenu(open) {
+    if (!drawer) return;
+    drawer.classList.toggle('open', open);
+    if (overlay) overlay.classList.toggle('open', open);
+    if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.style.overflow = open ? 'hidden' : '';
   }
 
+  if (btn) {
+    btn.addEventListener('click', function () {
+      setMenu(!drawer.classList.contains('open'));
+    });
+  }
+  Array.prototype.forEach.call(closers, function (el) {
+    el.addEventListener('click', function () { setMenu(false); });
+  });
+  if (overlay) overlay.addEventListener('click', function () { setMenu(false); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setMenu(false);
+  });
+
+  /* Contact form — POST to Web3Forms, then land on the thank-you page. */
   var form = document.getElementById('contact-form');
   if (!form) return;
+
   var status = document.getElementById('form-status');
+  var submit = form.querySelector('button[type="submit"]');
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    var req = form.querySelectorAll('[required]');
-    for (var i = 0; i < req.length; i++) {
-      if (!req[i].checkValidity()) {
-        status.className = 'form-status err';
-        status.textContent = 'Please complete the highlighted fields.';
-        req[i].focus();
-        return;
-      }
-    }
 
-    var btnEl = form.querySelector('button[type=submit]');
-    var label = btnEl.textContent;
-    btnEl.disabled = true;
-    btnEl.textContent = 'Sending…';
+    if (status) { status.textContent = ''; status.className = 'form-status'; }
+    if (submit) { submit.disabled = true; submit.textContent = 'Sending...'; }
 
-    fetch(form.action, {
+    fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      body: new FormData(form),
-      headers: { Accept: 'application/json' }
+      body: new FormData(form)
     })
-      .then(function (r) {
-        if (!r.ok) throw new Error('bad response');
-        form.reset();
-        status.className = 'form-status ok';
-        status.textContent = 'Thanks — your message is through. I’ll get back to you shortly.';
+      .then(function (r) { return r.json(); })
+      .then(function (result) {
+        if (result && result.success) {
+          window.location.href = '/submission-received';
+        } else {
+          throw new Error(result && result.message ? result.message : 'Submission failed');
+        }
       })
       .catch(function () {
-        status.className = 'form-status err';
-        status.innerHTML =
-          'Something went wrong. Email me directly at <a href="mailto:colin@webthrive.io">colin@webthrive.io</a>.';
-      })
-      .then(function () {
-        btnEl.disabled = false;
-        btnEl.textContent = label;
+        if (status) {
+          status.textContent = 'Something went wrong. Please try again, or email me directly at colin@webthrive.io.';
+          status.className = 'form-status error';
+        }
+        if (submit) { submit.disabled = false; submit.textContent = 'Send Message'; }
       });
   });
 })();
