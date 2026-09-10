@@ -51,7 +51,10 @@
       </div>
     </div>
     <div>
-      <img class="portrait" src="/images/colin-harbut.jpg" alt="Colin Harbut" width="300" height="375"
+      <img class="portrait" src="/images/colin-harbut.jpg"
+           srcset="/images/colin-harbut.jpg 600w, /images/colin-harbut@2x.jpg 1200w"
+           sizes="(max-width:880px) 300px, 300px"
+           alt="Colin Harbut" width="300" height="375" loading="eager"
            onerror="this.style.display='none';document.getElementById('portrait-fb').style.display='grid';">
       <div class="portrait-fb" id="portrait-fb" aria-hidden="true">CH</div>
     </div>
