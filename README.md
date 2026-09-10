@@ -5,7 +5,8 @@ Static site for Colin Harbut — Fractional CMO. Deployed on Vercel from `main`.
 ## Structure
 
 ```
-/                                        homepage
+/                                        quiet holding page (name + email only)
+/home/                                   portfolio homepage
 /professional-experience/                experience timeline
 /core-strengths/                         capabilities
 /methodology/                            strategic + execution philosophy
